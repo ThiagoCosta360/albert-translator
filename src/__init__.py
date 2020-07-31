@@ -7,9 +7,7 @@ import os
 import json
 import configparser
 from albertv0 import *
-# from google.api_core.exceptions import *
-# from google.cloud import translate_v3beta1 as api
-# from urllib.parse import quote as quote_url
+from urllib.parse import quote as quote_url
 
 __iid__ = "PythonInterface/v0.2"
 __author__ = "Thiago Costa"
@@ -19,41 +17,72 @@ __trigger__ = "tr "
 __dependencies__ = []
 
 iconPath = os.path.dirname(__file__) + "/icon.png"
-config = configparser.ConfigParser()
 client = None
-
 
 source = "auto"
 target = "pt"
 
 
 def handleQuery(query):
+    if not query.isTriggered:
+        return
+
+    source = "auto"
+    targets = ["pt", "en", "ja", "fr", "it"]
 
     str = query.string.strip()
     if str == "":
-        return makeItem(query, subtext="Usage: `tr [:<lang-code>] [string to translate]`")
+        return makeItem(query, subtext="Usage: `tr [:lang-code] [string to translate]`")
 
     if (str[0] == ":"):
         target = str.split(' ')[0][1:]
-        str = str.split(' ')[1:]
+        str = ' '.join(str.split(' ')[1:])
+        if lang.has(target):
+            item = makeItem(
+                query, "View in Google Translate to {}".format(
+                    lang.toName(target)),
+                "https://translate.google.com/#{}/{}/{}".format(
+                    source, target, quote_url(str, safe='')
+                ))
+            item.addAction(UrlAction(
+                "View in Google Translate",
+                "https://translate.google.com/#{}/{}/{}".format(
+                    source, target, quote_url(str, safe=''))
+            ))
+        else:
+            item = badLanguageItem(query, target)
 
-    if lang.has(target):
+    else:
         item = makeItem(
-            str, "View in Google Translate to {}".format(lang.toName(target)),
+            query, "View in Google Translate to {}".format(
+                lang.toName(targets[0])),
             "https://translate.google.com/#{}/{}/{}".format(
-                source, target, quote_url(str, safe='')
+                source, targets[0], quote_url(str, safe='')
             ))
         item.addAction(UrlAction(
             "View in Google Translate",
             "https://translate.google.com/#{}/{}/{}".format(
-                source, target, quote_url(str, safe=''))
+                source, targets[0], quote_url(str, safe=''))
         ))
-        item.addAction(ClipAction("Copy to clipboard", item.text))
-
-    else:
-        item = badLanguageItem(query, target)
-
     return item
+
+    # TODO: not working yet
+    # else:
+    #     items = [5]
+    #     for i in range(5):
+    #         items[i] = makeItem(
+    #             query, "View in Google Translate to {}".format(
+    #                 lang.toName(targets[i])),
+    #             "https://translate.google.com/#{}/{}/{}".format(
+    #                 source, targets[i], quote_url(str, safe='')
+    #             ))
+    #         items[i].addAction(UrlAction(
+    #             "View in Google Translate",
+    #             "https://translate.google.com/#{}/{}/{}".format(
+    #                 source, targets[i], quote_url(str, safe=''))
+    #         ))
+
+    return items
 
 
 def badLanguageItem(query, lang):
