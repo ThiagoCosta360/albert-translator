@@ -20,17 +20,16 @@ iconPath = os.path.dirname(__file__) + "/icon.png"
 client = None
 
 source = "auto"
-target = "pt"
+targets = ["pt", "en", "ja", "fr", "it"]
 
 
 def handleQuery(query):
     if not query.isTriggered:
         return
 
-    source = "auto"
-    targets = ["pt", "en", "ja", "fr", "it"]
-
     str = query.string.strip()
+    items = []
+
     if str == "":
         return makeItem(query, subtext="Usage: `tr [:lang-code] [string to translate]`")
 
@@ -38,51 +37,32 @@ def handleQuery(query):
         target = str.split(' ')[0][1:]
         str = ' '.join(str.split(' ')[1:])
         if lang.has(target):
-            item = makeItem(
-                query, "View in Google Translate to {}".format(
-                    lang.toName(target)),
-                "https://translate.google.com/#{}/{}/{}".format(
-                    source, target, quote_url(str, safe='')
-                ))
-            item.addAction(UrlAction(
-                "View in Google Translate",
-                "https://translate.google.com/#{}/{}/{}".format(
-                    source, target, quote_url(str, safe=''))
-            ))
+            item = translatorItem(query, source, target, str)
         else:
             item = badLanguageItem(query, target)
+        items.append(item)
 
     else:
-        item = makeItem(
-            query, "View in Google Translate to {}".format(
-                lang.toName(targets[0])),
-            "https://translate.google.com/#{}/{}/{}".format(
-                source, targets[0], quote_url(str, safe='')
-            ))
-        item.addAction(UrlAction(
-            "View in Google Translate",
-            "https://translate.google.com/#{}/{}/{}".format(
-                source, targets[0], quote_url(str, safe=''))
-        ))
-    return item
-
-    # TODO: not working yet
-    # else:
-    #     items = [5]
-    #     for i in range(5):
-    #         items[i] = makeItem(
-    #             query, "View in Google Translate to {}".format(
-    #                 lang.toName(targets[i])),
-    #             "https://translate.google.com/#{}/{}/{}".format(
-    #                 source, targets[i], quote_url(str, safe='')
-    #             ))
-    #         items[i].addAction(UrlAction(
-    #             "View in Google Translate",
-    #             "https://translate.google.com/#{}/{}/{}".format(
-    #                 source, targets[i], quote_url(str, safe=''))
-    #         ))
+        for target in targets:
+            item = translatorItem(query, source, target, str)
+            items.append(item)
 
     return items
+
+
+def translatorItem(query, source, target, str):
+    item = makeItem(
+        query, "View in Google Translate to {}".format(
+            lang.toName(target)),
+        "https://translate.google.com/#{}/{}/{}".format(
+            source, target, quote_url(str, safe='')
+        ))
+    item.addAction(UrlAction(
+        "View in Google Translate",
+        "https://translate.google.com/#{}/{}/{}".format(
+            source, target, quote_url(str, safe=''))
+    ))
+    return item
 
 
 def badLanguageItem(query, lang):
