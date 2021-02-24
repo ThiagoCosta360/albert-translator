@@ -6,15 +6,14 @@ Usage: tr [to:<lang-code>] <text to translate>"""
 import os
 import json
 import configparser
-from albertv0 import *
+from albert import *
 from urllib.parse import quote as quote_url
 
-__iid__ = "PythonInterface/v0.2"
-__author__ = "Thiago Costa"
-__prettyname__ = "My Translation"
-__version__ = "1.0.0"
-__trigger__ = "tr "
-__dependencies__ = []
+__title__ = "translator"
+__doc__ = "My Translation"
+__authors__ = "Thiago Costa"
+__version__ = "0.4.2"
+__triggers__ = "tr "
 
 iconPath = os.path.dirname(__file__) + "/icon.png"
 client = None
@@ -73,9 +72,9 @@ def badLanguageItem(query, lang):
     return item
 
 
-def makeItem(query=None, text=__prettyname__, subtext=""):
+def makeItem(query=None, text=__title__, subtext=""):
     return Item(
-        id=__prettyname__,
+        id=__title__,
         icon=iconPath,
         text=text,
         subtext=subtext,
