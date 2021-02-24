@@ -19,7 +19,7 @@ iconPath = os.path.dirname(__file__) + "/icon.png"
 client = None
 
 source = "auto"
-targets = ["pt", "en", "ja", "fr", "it"]
+targets = ["pt", "en"]
 
 
 def handleQuery(query):
